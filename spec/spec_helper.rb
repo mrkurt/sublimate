@@ -5,35 +5,42 @@ Fog.mock!
 
 module Helpers
   def get_google_store
-    Sublimate::Uploader.new(:provider => 'Google',
+    storage = Fog::Storage.new(:provider => 'Google',
           :google_storage_access_key_id => 'test',
-          :google_storage_secret_access_key => 'test',
-          :auto_create_bucket => true)
+          :google_storage_secret_access_key => 'test')
+    test_uploader(storage)
   end
   
   def get_rackspace_store
     return nil unless ENV['RACKSPACE_USERNAME'] || ENV['RACKSPACE_API_KEY']
-    Sublimate::Uploader.new(:provider => 'Rackspace',
+    storage = Fog::Storage.new(:provider => 'Rackspace',
           :rackspace_username => ENV['RACKSPACE_USERNAME'],
-          :rackspace_api_key => ENV['RACKSPACE_API_KEY'],
-          :auto_create_bucket => true)
+          :rackspace_api_key => ENV['RACKSPACE_API_KEY'])
+    test_uploader(storage)
   end
   def get_aws_store
     return nil unless ENV['AWS_ACCESS_KEY'] && ENV['AWS_SECRET_ACCESS_KEY']
     opts = {
       :provider => 'AWS',
       :aws_access_key_id => ENV['AWS_ACCESS_KEY'],
-      :aws_secret_access_key => ENV['AWS_SECRET_ACCESS_KEY'],
-      :auto_create_bucket => true
+      :aws_secret_access_key => ENV['AWS_SECRET_ACCESS_KEY']
     }
-    Sublimate::Uploader.new(opts)
+    storage = Fog::Storage.new(opts)
+    test_uploader(storage)
   end
 
-  def tmpfile
+  def test_uploader(storage)
+    bucket = storage.directories.get('sublimate-test')
+    bucket = storage.directories.create('sublimate-test') if bucket.nil?
+    Sublimate::Uploader.new(bucket)
+  end
+
+  def tmpfile(recreate = false)
     tmp = '/tmp/uploader-test'
-    return tmp if File.exist?(tmp)
+    return tmp if File.exist?(tmp) && !recreate
     File.open(tmp, 'wb') do |f|
-      f.truncate(1024 * 1024 * 10)
+      size = 1024 * 1024 * 10 * (1 + rand(0.9)) #randomizes sizes so tests mostly work while overwriting
+      f.truncate(size.to_i)
     end
     tmp
   end

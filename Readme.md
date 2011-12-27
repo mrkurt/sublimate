@@ -15,7 +15,7 @@ Set the following environment variables to run real, live tests (Mocks don't wor
 
 Usage
 =====
-You'll need an instance of `Sublimate::Uploader`. Initialize with the options you'd use to create a Fog storage instance.
+You'll need an instance of `Sublimate::Uploader`. Just pass it a Fog bucket/directory and call `store_file`
 
 Example:
 
@@ -23,9 +23,10 @@ Example:
 opts = {
   :provider => 'AWS',
   :aws_access_key_id => ENV['AWS_ACCESS_KEY'],
-  :aws_secret_access_key => ENV['AWS_SECRET_ACCESS_KEY'],
-  :auto_create_bucket => true
+  :aws_secret_access_key => ENV['AWS_SECRET_ACCESS_KEY']
 }
-uploader = Sublimate::Uploader.new(opts)
-upload.store_file(path, :bucket => 'large-file-bucket', :key => 'something.iso')
+s3 = Fog::Storage.new(opts)
+bucket = s3.directories.get('HUGE-FILES')
+uploader = Sublimate::Uploader.new(bucket)
+upload.store_file(path, :key => 'something.iso')
 ```
