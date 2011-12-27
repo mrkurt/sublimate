@@ -18,6 +18,7 @@ Usage
 You'll need an instance of `Sublimate::Uploader`. Initialize with the options you'd use to create a Fog storage instance.
 
 Example:
+
 ```ruby
 opts = {
   :provider => 'AWS',
