@@ -1,5 +1,13 @@
 module Sublimate
   class Uploader
+    def self.multipart_min_size
+      @multipart_min_size ||= (1024 * 1024 * 1024 * 5) #5gb default
+    end
+
+    def self.multipart_min_size=(v)
+      @multipart_min_size = v
+    end
+
     def initialize(bucket, opts = {})
       @bucket = bucket
       @opts = opts
@@ -11,7 +19,7 @@ module Sublimate
       size = File.size(path)
 
       m = multi_method_name
-      if respond_to?(m)
+      if size > self.class.multipart_min_size && respond_to?(m)
         chunked = ChunkedFile.new(path, :chunk_size => @opts[:multipart_chunk_size])
         send(m, chunked, opts)
       else

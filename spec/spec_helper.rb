@@ -3,6 +3,9 @@ require 'sublimate'
 
 Fog.mock!
 
+Sublimate::ChunkedFile.default_chunk_size = 1024 * 1024 * 6
+Sublimate::Uploader.multipart_min_size = 1024 * 1024 * 10 #for faster testing
+
 module Helpers
   def get_google_store
     storage = Fog::Storage.new(:provider => 'Google',
@@ -39,7 +42,11 @@ module Helpers
     tmp = '/tmp/uploader-test'
     return tmp if File.exist?(tmp) && !recreate
     File.open(tmp, 'wb') do |f|
-      size = 1024 * 1024 * 10 * (1 + rand(0.9)) #randomizes sizes so tests mostly work while overwriting
+      size =  if recreate.is_a?(Numeric)
+                recreate
+              else
+                1024 * 1024 * 10 * (1 + rand(0.9)) #randomizes sizes so tests mostly work while overwriting
+              end
       f.truncate(size.to_i)
     end
     tmp
