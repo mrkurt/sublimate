@@ -11,3 +11,20 @@ Set the following environment variables to run real, live tests (Mocks don't wor
 * Rackspace
   * RACKSPACE_USERNAME
   * RACKSPACE_API_KEY
+
+
+Usage
+=====
+You'll need an instance of `Sublimate::Uploader`. Initialize with the options you'd use to create a Fog storage instance.
+
+Example:
+```ruby
+opts = {
+  :provider => 'AWS',
+  :aws_access_key_id => ENV['AWS_ACCESS_KEY'],
+  :aws_secret_access_key => ENV['AWS_SECRET_ACCESS_KEY'],
+  :auto_create_bucket => true
+}
+uploader = Sublimate::Uploader.new(opts)
+upload.store_file(path, :bucket => 'large-file-bucket', :key => 'something.iso')
+```
